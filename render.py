@@ -53,6 +53,7 @@ else:
     dims = dimmap[len(kanji)]
     for k,d in zip(kanji,dims):
         sketch = 0
+        path = []
         glyph = glyphname(k)
         if glyph not in names:
             if simpmap is None:
@@ -62,18 +63,21 @@ else:
             k = u' '
             if orig in simpmap:
                 done = set((orig,))
-                will = [(s,1) for s in simpmap[orig]]
+                will = [(s,1,[orig]) for s in simpmap[orig]]
                 while len(will) > 0:
-                    now, nsketch = will.pop()
+                    now, nsketch, npath = will.pop()
                     done.add(now)
                     if glyphname(now) in names:
                         k = now
                         sketch = nsketch
+                        path = npath
                         break
                     elif now in simpmap:
                         for s in simpmap[now]:
                             if s not in done:
-                                will.append((s,nsketch+1))
+                                will.append((s,nsketch+1,npath+[now]))
+        if path:
+            print '    <!--%s-->' % path
         print ('    <g transform="translate(%s,%s)"><g class="seal" transform="scale(%s,%s)" fill="#%s0000">\n'
                % (d + (hex(min(sketch*3,15))[2:]*2,))).encode('utf-8')
         if k != u' ':
